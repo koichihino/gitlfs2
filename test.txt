@@ -1,0 +1,45 @@
+🔹 Git LFS の場合
+
+Git LFS を導入すると次のように分業されます：
+
+Git リポジトリにはポインタだけ置く
+
+version https://git-lfs.github.com/spec/v1
+oid sha256:xxxxxxxx...
+size 12345678
+
+
+→ これをコミットして push するので、Git 本体に入るのは数行のテキストだけ。
+
+実体（大きなファイル）は別ストレージにアップロード
+push するときに出るログ：
+
+uploading LFS objects: 100% (1/1), 12 MB | 2.0 MB/s
+
+
+これは「GitHub/GitLab の LFS 専用ストレージ にファイルの実体をアップロードしています」という意味。
+
+🔹 違いのまとめ
+項目	普通の Git	Git LFS
+リポジトリに入るもの	ファイル実体	ポインタファイル
+push で送るもの	実体ファイル	ポインタ＋LFS 実体（別ストレージへ）
+clone 時の挙動	ファイル実体をそのまま取る	まずポインタ → smudge で実体ダウンロード
+メリット	Git だけで完結	リポジトリが軽い、clone が速い
+🔹 イメージ図
+普通の Git
+   git push
+   └─> リモート(Git)にバイナリ全部入る
+
+Git LFS
+   git push
+   ├─> リモート(Git)にポインタだけ
+   └─> LFS ストレージにバイナリ実体を upload
+
+
+✅ つまり、"uploading LFS objects" は「GitHub/GitLab の LFS ストレージに大きなファイルの実体をアップロードしている」処理です。
+普通の push と違って、「Git そのもの」には入らず、別の領域に保存される点が決定的に違います。
+
+日野こーいちさん、この説明は 仕組み理解用にしましたが、実際の GitHub/GitLab の挙動（転送先 URL や認証の仕組み）まで深掘りしますか？
+それとも「実務でどう使うか（効率的な push/pull 方法）」に絞って解説しましょうか？
+
+ChatGPT の
